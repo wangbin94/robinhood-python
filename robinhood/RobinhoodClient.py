@@ -75,9 +75,9 @@ class RobinhoodClient:
         'Accept-Encoding': 'gzip, deflate',
         'Accept-Language': 'en;q=1',
         'Content-type': 'application/x-www-form-urlencoded; charset=utf-8',
-        'X-Robinhood-API-Version': '1.204.0',
+        'X-Robinhood-API-Version': '1.265.0',
         'Connection': 'keep-alive',
-        'User-Agent': 'Robinhood/823 (iPhone; iOS 7.1.2; Scale/2.00)',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',
     }
     self._api_session.headers = common_headers
     self._nummus_session.headers = common_headers
@@ -137,11 +137,14 @@ class RobinhoodClient:
       oauth2_details['refresh_token']
     )
 
-  def set_auth_token_with_credentials(self, username, password, mfa=None):
+  def set_auth_token_with_credentials(self, username, password, device_token, mfa=None):
     body = {
       'username': username,
       'password': password,
       'grant_type': 'password',
+      'device_token': device_token,
+      'expires_in': 86400,
+      'scope': 'internal',
       'client_id': self._client_id
     }
     if mfa:
@@ -2173,7 +2176,7 @@ class RobinhoodClient:
     Example response:
     TODO
     """
-    response = self._get_session(NUMMUS, authed=True).get(NUMMUS_HOST + 'portfolios/{}/'.format(portfolio_id))
+    response = self._get_session(NUMMUS, authed=True).get(NUMMUS_HOST + 'accounts/{}/portfolio'.format(portfolio_id))
     _raise_on_error(response)
     return response.json()
 
@@ -2393,23 +2396,34 @@ class RobinhoodClient:
     _raise_on_error(response)
     return response.json()
 
-  def order_crypto(self, currency_pair_id, order_type, order_side, quantity, price):
+  def get_crypto_acount(self):
+    response = self._get_session(NUMMUS, authed=True).get(NUMMUS_HOST + 'accounts/')
+    _raise_on_error(response)
+    print(response.json())
+    return response.json()['results'][0]
+
+  def order_crypto(self, currency_pair_id, order_type, order_side, quantity, price, use_account_url=None):
     """
     Example response:
     TODO
     """
     assert order_side in ORDER_SIDES
     assert order_type in ORDER_TYPES
+
     body = {
         'side': order_side,
         'currency_pair_id': currency_pair_id,
-        'price': price,
-        'quantity': quantity,
+        'price': str(price),
+        'quantity': str(quantity),
         'ref_id': str(uuid.uuid4()),
         'time_in_force': 'gtc',
         'type': order_type,
     }
-    response = self._get_session(NUMMUS, authed=True).post(NUMMUS_HOST + 'orders/')
+    # Unlike everything else until now, the api wants json...
+    custom_headers = {
+        'Content-type': 'application/json;',
+    }
+    response = self._get_session(NUMMUS, authed=True).post(NUMMUS_HOST + 'orders/', data=json.dumps(body), headers=custom_headers)
     _raise_on_error(response)
     return response.json()
 

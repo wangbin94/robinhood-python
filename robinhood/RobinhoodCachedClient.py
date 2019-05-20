@@ -70,7 +70,7 @@ vvvvvvvvvvvvvvvvvvvvvvv robinhood-python disclosures vvvvvvvvvvvvvvvvvvvvvvv
     with open(cache_path, 'w') as cache_file:
       cache_file.write(datetime.now().isoformat())
 
-  def login(self, username, password, force_login=False):
+  def login(self, username, password, device_token, force_login=False):
     cache_path = os.path.join(cache_root_path, 'auth_data')
     if os.path.exists(cache_path) and not force_login:
       with open(cache_path, 'r') as cache_file:
@@ -85,10 +85,10 @@ vvvvvvvvvvvvvvvvvvvvvvv robinhood-python disclosures vvvvvvvvvvvvvvvvvvvvvvv
       # Get a new auth token
 
       try:
-        self.set_auth_token_with_credentials(username, password)
+        self.set_auth_token_with_credentials(username, password, device_token)
       except MfaRequired:
         mfa = input('MFA: ')
-        self.set_auth_token_with_credentials(username, password, mfa)
+        self.set_auth_token_with_credentials(username, password, device_token, mfa)
 
       with open(cache_path, 'w') as cache_file:
         auth_header = self._authorization_headers['Authorization']
