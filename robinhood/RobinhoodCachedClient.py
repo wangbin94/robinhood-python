@@ -23,7 +23,7 @@ FORCE_CACHE = 'FORCE_CACHE'
 class RobinhoodCachedClient(RobinhoodClient):
   def __init__(self):
     super(RobinhoodCachedClient, self).__init__()
-    self.confirm_disclosures_if_needed()
+    # self.confirm_disclosures_if_needed()
 
   def confirm_disclosures_if_needed(self):
     cache_path = os.path.join(cache_root_path, 'disclosures_acknowledged')
@@ -70,7 +70,7 @@ vvvvvvvvvvvvvvvvvvvvvvv robinhood-python disclosures vvvvvvvvvvvvvvvvvvvvvvv
     with open(cache_path, 'w') as cache_file:
       cache_file.write(datetime.now().isoformat())
 
-  def login(self, force_login=False):
+  def login(self, username, password, force_login=False):
     cache_path = os.path.join(cache_root_path, 'auth_data')
     if os.path.exists(cache_path) and not force_login:
       with open(cache_path, 'r') as cache_file:
@@ -83,8 +83,6 @@ vvvvvvvvvvvvvvvvvvvvvvv robinhood-python disclosures vvvvvvvvvvvvvvvvvvvvvvv
         )
     else:
       # Get a new auth token
-      username = input('Username: ')
-      password = getpass.getpass()
 
       try:
         self.set_auth_token_with_credentials(username, password)
