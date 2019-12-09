@@ -1185,7 +1185,7 @@ class RobinhoodClient:
         "last_trade_price_source": "consolidated"
     }
     """
-    response = self._get_session(API).get(API_HOST + 'quotes/{}/'.format(instrument_id))
+    response = self._get_session(API, authed=True).get(API_HOST + 'quotes/{}/'.format(instrument_id))
     _raise_on_error(response)
     return response.json()
 
