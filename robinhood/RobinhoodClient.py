@@ -2097,7 +2097,6 @@ class RobinhoodClient:
     body = {
         'account': account_url,
         'instrument': instrument_id_to_url(instrument_id),
-        'price': price,
         'quantity': quantity,
         'side': order_side,
         'symbol': symbol,
@@ -2105,6 +2104,12 @@ class RobinhoodClient:
         'trigger': 'immediate', # see util.TRIGGERS
         'type': order_type,
     }
+    if order_type == 'market':
+      if order_side == 'buy':
+        body['price'] = price
+    else:
+      body['price'] = price
+
     response = self._get_session(API, authed=True).post(API_HOST + 'orders/', data=body)
     _raise_on_error(response)
     return response.json()
